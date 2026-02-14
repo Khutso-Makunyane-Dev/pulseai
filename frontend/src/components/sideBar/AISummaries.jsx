@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
-import { analyzeText } from "../../api/analysis";
+import { analyzeText, updateChatTitle } from "../../api/analysis";
+import { generateChatTitle } from "../../utils/titleGenerator";
 
 import { IoMdSend } from "react-icons/io";
 import { IoAddSharp, IoMicOutline } from "react-icons/io5";
@@ -8,7 +9,11 @@ import { MdOutlineTaskAlt } from "react-icons/md";
 import { AiOutlineDelete } from "react-icons/ai";
 import { TiPinOutline } from "react-icons/ti";
 import { PiArchiveThin } from "react-icons/pi";
+import { FaRobot, FaCommentDots } from "react-icons/fa"; // Only added these two icons
 import Icon from '../../assets/Icon.svg';
+import { PiUserFocus } from "react-icons/pi";
+import { MdOutlineErrorOutline } from "react-icons/md";
+import { MdOutlineAnalytics } from "react-icons/md";
 
 export default function AISummaries({
   messages,
@@ -17,12 +22,22 @@ export default function AISummaries({
   onDeleteChat,
   onPinChat,
   onArchiveChat,
+  onChatTitleUpdate,
+  searchQuery,
 }) {
+
+  console.log("🔥 AISummaries rendered with props:", {
+    onChatTitleUpdate: onChatTitleUpdate,
+    type: typeof onChatTitleUpdate,
+    activeChatId,
+    messagesCount: messages.length
+  });
+  
   const [input, setInput] = useState("");
   const [error, setError] = useState("");
   const [more, setMore] = useState(false);
   const [menu, setMenu] = useState(false);
-  const [isLoading, setIsLoading] = useState(false); // ✅ local loading
+  const [isLoading, setIsLoading] = useState(false);
   const chatContainerRef = useRef(null);
 
   // Auto-scroll to bottom when messages change
@@ -38,17 +53,33 @@ export default function AISummaries({
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!input.trim()) return;
+    
+    if (!activeChatId) {
+      setError("Please click New Chat first");
+      return;
+    }
 
-    // Add user message
+    const isFirstMessage = messages.length === 0;
+
     setMessages((prev) => [...prev, { type: "user", text: input }]);
     setError("");
-    setIsLoading(true); // ✅ set loading
+    setIsLoading(true);
 
     try {
-      const res = await analyzeText(input);
+      if (isFirstMessage) {
+        const newTitle = generateChatTitle(input);
+        await updateChatTitle(activeChatId, newTitle);
+        if (onChatTitleUpdate) {
+          onChatTitleUpdate(activeChatId, newTitle);
+        }
+      }
+
+      const res = await analyzeText(input, activeChatId);
 
       let aiMessage = { type: "ai" };
-      if (res.type === "human_response") aiMessage.text = res.response;
+      if (res.type === "human_response") {
+        aiMessage.text = res.response;
+      }
       if (res.type === "analysis_response") {
         aiMessage = {
           type: "ai",
@@ -60,17 +91,88 @@ export default function AISummaries({
         };
       }
 
-      // Add AI message
       setMessages((prev) => [...prev, aiMessage]);
       setInput("");
     } catch (err) {
       console.error(err);
       setError("Failed to get AI response. Check backend.");
     } finally {
-      setIsLoading(false); // ✅ reset loading
+      setIsLoading(false);
     }
   };
 
+  const highlightText = (text) => {
+    if (!searchQuery || !text) return text;
+    
+    const parts = text.split(new RegExp(`(${searchQuery})`, 'gi'));
+    return parts.map((part, i) => 
+      part.toLowerCase() === searchQuery.toLowerCase() 
+        ? <mark key={i} className="bg-yellow-200">{part}</mark>
+        : part
+    );
+  };
+
+  // If no active chat, show beautiful empty state
+  if (!activeChatId) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full text-center px-4 bg-white">
+        <div className="relative mb-6">
+          <div className="w-32 h-32 bg-gradient-to-br from-[#E013CC] to-purple-400 rounded-full flex items-center justify-center animate-pulse">
+            <FaRobot className="text-white text-6xl" />
+          </div>
+          <div className="absolute -bottom-2 -right-2 w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg">
+            <FaCommentDots className="text-[#E013CC] text-2xl" />
+          </div>
+        </div>
+        
+        <h2 className="text-3xl font-bold text-gray-800 mb-3">
+          Welcome to PulseAI! 👋
+        </h2>
+        
+        <p className="text-gray-600 text-lg mb-8 max-w-md">
+          Start a conversation with your AI assistant. Analyze sentiment, detect risks, and get intelligent insights from your messages.
+        </p>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-2xl mb-8">
+          <div className="bg-gradient-to-br from-purple-50 to-pink-50 p-4 rounded-xl">
+            <div className="w-10 h-10 bg-[#E013CC] rounded-full flex items-center justify-center mb-3 mx-auto">
+              <span className="text-white text-xl">
+                <PiUserFocus />
+              </span>
+            </div>
+            <h3 className="font-semibold text-gray-800 mb-1">Sentiment Analysis</h3>
+            <p className="text-sm text-gray-600">Detect emotions and tone in your text</p>
+          </div>
+          
+          <div className="bg-gradient-to-br from-purple-50 to-pink-50 p-4 rounded-xl">
+            <div className="w-10 h-10 bg-[#E013CC] rounded-full flex items-center justify-center mb-3 mx-auto">
+              <span className="text-white text-xl">
+                <MdOutlineErrorOutline />
+              </span>
+            </div>
+            <h3 className="font-semibold text-gray-800 mb-1">Risk Detection</h3>
+            <p className="text-sm text-gray-600">Identify potentially harmful content</p>
+          </div>
+          
+          <div className="bg-gradient-to-br from-purple-50 to-pink-50 p-4 rounded-xl">
+            <div className="w-10 h-10 bg-[#E013CC] rounded-full flex items-center justify-center mb-3 mx-auto">
+              <span className="text-white text-xl">
+                <MdOutlineAnalytics />
+              </span>
+            </div>
+            <h3 className="font-semibold text-gray-800 mb-1">Smart Summaries</h3>
+            <p className="text-sm text-gray-600">Get concise summaries of your messages</p>
+          </div>
+        </div>
+        
+        <p className="text-xs text-gray-400 mt-6">
+          PulseAI v1.0 - Powered by advanced AI
+        </p>
+      </div>
+    );
+  }
+
+  // Your existing UI remains EXACTLY the same from here
   return (
     <div className="flex flex-col w-full h-full bg-white px-4 pb-4">
 
@@ -109,23 +211,30 @@ export default function AISummaries({
       {/* CHAT AREA */}
       <div ref={chatContainerRef} className="flex-1 overflow-y-auto space-y-4 p-4 rounded-lg mt-4 scrollbar-hide">
         {messages.map((msg, idx) => (
-          <div key={idx} className={`flex ${msg.type === "user" ? "justify-end" : "justify-start"}`}>
+          <div 
+          key={idx} 
+          id={`message-${msg.id}`}
+          className={`flex ${msg.type === "user" ? "justify-end" : "justify-start"}`}>
             <div className={`max-w-[75%] rounded-2xl px-4 py-3 shadow-sm ${
               msg.type === "user"
                 ? "bg-[#E013CC] text-white rounded-br-md"
                 : "bg-white text-gray-800 border border-[#83828246] rounded-bl-md"
             }`}>
-              {msg.type === "user" && msg.text}
+              {msg.type === "user" && (
+                <div>{highlightText(msg.text)}</div>
+              )}
 
               {msg.type === "ai" && (
                 <div className="space-y-3">
-                  {msg.text && <p>{msg.text}</p>}
+                  {msg.text && <p>{highlightText(msg.text)}</p>}
+                  
                   {msg.summary && (
                     <div>
                       <p className="text-xs uppercase text-gray-400">Summary</p>
-                      <p>{msg.summary}</p>
+                      <p>{highlightText(msg.summary)}</p>
                     </div>
                   )}
+                  
                   {msg.sentiment && (
                     <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium
                       ${msg.sentiment.sentiment === "POSITIVE"
@@ -134,6 +243,7 @@ export default function AISummaries({
                       {msg.sentiment.sentiment} • {(msg.sentiment.confidence * 100).toFixed(1)}%
                     </div>
                   )}
+                  
                   {typeof msg.risk !== "undefined" && (
                     <div className={`flex items-start gap-3 p-3 rounded-xl border text-sm
                       ${msg.risk ? "bg-red-50 border-red-200 text-red-700" : "bg-green-50 border-green-200 text-green-700"}`}>
@@ -146,6 +256,7 @@ export default function AISummaries({
                       </div>
                     </div>
                   )}
+                  
                   {msg.topics?.length > 0 && (
                     <div className="flex flex-wrap gap-2">
                       {msg.topics.map((t, i) => (
@@ -155,10 +266,11 @@ export default function AISummaries({
                       ))}
                     </div>
                   )}
+                  
                   {msg.feedback && (
                     <div className="bg-purple-50 p-3 rounded-lg">
                       <p className="text-xs uppercase text-gray-400">AI Insight</p>
-                      <p>{msg.feedback}</p>
+                      <p>{highlightText(msg.feedback)}</p>
                     </div>
                   )}
                 </div>
@@ -203,8 +315,10 @@ export default function AISummaries({
           </form>
         </div>
       </div>
-
-      {error && <p className="text-red-500 mt-2">{error}</p>}
+        <p className="text-gray-400 text-xs flex justify-center w-full">
+          PulseAI - powered and protected
+          </p>
+      {error && <p className="text-red-500 flex justify-center w-full mt-2">{error}</p>}
     </div>
   );
 }
