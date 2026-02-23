@@ -26,13 +26,10 @@ ENVIRONMENT = os.getenv("ENVIRONMENT", "development")
 
 # CORS configuration
 if ENVIRONMENT == "production":
-    # In production, only allow your frontend domains
     origins = [
-        "https://your-frontend.vercel.app",  # You'll update this after frontend deploy
-        # Add your custom domain here if you have one
+        "https://your-frontend.vercel.app",
     ]
 else:
-    # In development, allow localhost
     origins = [
         "http://localhost:5173",
         "http://127.0.0.1:5173",
@@ -53,7 +50,6 @@ app.include_router(analysis_routes.router)
 
 @app.get("/")
 def root():
-    """Root endpoint to verify API is running"""
     return {
         "message": "Welcome to PulseAI API",
         "environment": ENVIRONMENT,
@@ -63,5 +59,10 @@ def root():
 
 @app.get("/health")
 def health_check():
-    """Health check endpoint for Render"""
     return {"status": "healthy", "environment": ENVIRONMENT}
+
+# ✅ ADD THIS AT THE VERY END
+if __name__ == "__main__":
+    import uvicorn
+    port = int(os.getenv("PORT", 8000))
+    uvicorn.run("app.main:app", host="0.0.0.0", port=port, reload=False)
