@@ -46,12 +46,12 @@ export default function Login() {
   };
 
   return (
-    <div className="flex flex-col justify-center items-center gap-5 w-full h-screen p-4">
-      <img src={Logo} alt="Logo" className="w-40" />
+    <div className="flex flex-col justify-center items-center gap-5 w-full h-screen p-2 sm:p-4">
+      <img src={Logo} alt="Logo" className="w-30 sm:w-40" />
 
       <h1 className="text-[#696969] text-2xl font-bold">Login</h1>
 
-      <p className="text-[#696969] text-lg font-semibold">
+      <p className="text-[#696969] text-md text-center sm:text-lg font-semibold">
         Welcome back to PulseAI, smart and analytical AI system
       </p>
 
@@ -61,7 +61,7 @@ export default function Login() {
         onSubmit={handleSubmit}
         className="flex flex-col gap-3 items-center w-full p-4"
       >
-        <div className="flex items-center bg-[#F2F2F2] border-2 border-[#dfdfdf] gap-2 text-[#696969] w-md rounded-md p-3">
+        <div className="flex items-center bg-[#F2F2F2] border-2 border-[#dfdfdf] gap-2 text-[#696969] w-full sm:w-md rounded-md p-3">
           <HiOutlineMail />
           <input
             type="email"
@@ -74,7 +74,7 @@ export default function Login() {
           />
         </div>
 
-        <div className="flex items-center bg-[#F2F2F2] border-2 border-[#dfdfdf] gap-2 text-[#696969] w-md rounded-md p-3">
+        <div className="flex items-center bg-[#F2F2F2] border-2 border-[#dfdfdf] gap-2 text-[#696969] w-full sm:w-md  rounded-md p-3">
           <HiOutlineLockClosed />
           <input
             type="password"
@@ -87,7 +87,7 @@ export default function Login() {
           />
         </div>
 
-        <div className="flex gap-1 text-[#696969]">
+        <div className="flex gap-1 text-[#696969] text-sm sm:text-md">
           <p>Don’t have an account?</p>
           <Link to="/signup" className="text-[#E013CC] font-bold">
             Sign Up
@@ -97,7 +97,7 @@ export default function Login() {
         <button
           type="submit"
           disabled={loading}
-          className="bg-[#E013CC] text-white hover:bg-black w-md h-9 rounded-md duration-300"
+          className="bg-[#E013CC] text-white hover:bg-black w-full sm:w-md  h-9 rounded-md duration-300"
         >
           {loading ? "Logging in..." : "Login"}
         </button>

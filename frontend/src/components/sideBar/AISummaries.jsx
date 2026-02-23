@@ -6,9 +6,6 @@ import { IoMdSend } from "react-icons/io";
 import { IoAddSharp, IoMicOutline } from "react-icons/io5";
 import { CgDanger } from "react-icons/cg";
 import { MdOutlineTaskAlt } from "react-icons/md";
-import { AiOutlineDelete } from "react-icons/ai";
-import { TiPinOutline } from "react-icons/ti";
-import { PiArchiveThin } from "react-icons/pi";
 import { FaRobot, FaCommentDots } from "react-icons/fa"; // Only added these two icons
 import Icon from '../../assets/Icon.svg';
 import { PiUserFocus } from "react-icons/pi";
@@ -19,9 +16,6 @@ export default function AISummaries({
   messages,
   setMessages,
   activeChatId,
-  onDeleteChat,
-  onPinChat,
-  onArchiveChat,
   onChatTitleUpdate,
   searchQuery,
 }) {
@@ -115,8 +109,8 @@ export default function AISummaries({
   // If no active chat, show beautiful empty state
   if (!activeChatId) {
     return (
-      <div className="flex flex-col items-center justify-center h-full text-center px-4 bg-white">
-        <div className="relative mb-6">
+      <div className="flex flex-col items-center justify-center h-full text-center px-2 sm:px-4 bg-white">
+        <div className="relative mb-2 sm:mb-6">
           <div className="w-32 h-32 bg-gradient-to-br from-[#E013CC] to-purple-400 rounded-full flex items-center justify-center animate-pulse">
             <FaRobot className="text-white text-6xl" />
           </div>
@@ -125,15 +119,15 @@ export default function AISummaries({
           </div>
         </div>
         
-        <h2 className="text-3xl font-bold text-gray-800 mb-3">
+        <h2 className="text-xl sm:text-3xl font-bold text-gray-800 mb-2 sm:mb-3">
           Welcome to PulseAI! 👋
         </h2>
         
-        <p className="text-gray-600 text-lg mb-8 max-w-md">
+        <p className="text-gray-600 text-sm sm:text-lg mb-2 sm:mb-8 max-w-md">
           Start a conversation with your AI assistant. Analyze sentiment, detect risks, and get intelligent insights from your messages.
         </p>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-2xl mb-8">
+        <div className="hidden sm:grid grid-cols-1 md:grid-cols-3 gap-4 max-w-2xl mb-2 sm:mb-8">
           <div className="bg-gradient-to-br from-purple-50 to-pink-50 p-4 rounded-xl">
             <div className="w-10 h-10 bg-[#E013CC] rounded-full flex items-center justify-center mb-3 mx-auto">
               <span className="text-white text-xl">
@@ -174,51 +168,25 @@ export default function AISummaries({
 
   // Your existing UI remains EXACTLY the same from here
   return (
-    <div className="flex flex-col w-full h-full bg-white px-4 pb-4">
-
+    <div className="flex flex-col w-full h-full  px-1 sm:px-4 pb-4">
       {/* TOP ACTIONS */}
-      <div className="flex justify-end items-center gap-2 w-full h-auto">
-        <span className="bg-red-200 text-xs text-red-600 px-2 py-1 rounded-md border border-red-500">N</span>
-        <span className="bg-green-200 text-xs text-green-600 px-2 py-1 rounded-md border border-green-500">P</span>
-        <div className="relative">
-          <button onClick={() => setMenu((p) => !p)}
-            className="flex justify-center items-center hover:rotate-15 duration-300 transition-all p-1 cursor-pointer rounded-md">
-            <img src={Icon} alt="Icon" className="w-11" />
-          </button>
-
-          {menu && (
-            <div className="absolute right-0 top-full mt-2 w-60 h-auto bg-white border border-[#83828246] rounded-lg shadow-sm p-3 z-50">
-              <button
-                onClick={() => { onPinChat(activeChatId); setMenu(false); }}
-                className="flex items-center gap-2 text-gray-500 hover:bg-[#83828246] p-2 w-full h-10 rounded-md transition duration-300 cursor-pointer">
-                <TiPinOutline /> Pin Chat
-              </button>
-              <button
-                onClick={() => { onArchiveChat(activeChatId); setMenu(false); }}
-                className="flex items-center gap-2 text-gray-500 hover:bg-[#83828246] p-2 w-full h-10 rounded-md transition duration-300 cursor-pointer">
-                <PiArchiveThin /> Archive
-              </button>
-              <button
-                onClick={() => { onDeleteChat(activeChatId); setMenu(false); }}
-                className="flex items-center gap-2 text-red-500 hover:bg-[#83828246] p-2 w-full h-10 rounded-md transition duration-300 cursor-pointer">
-                <AiOutlineDelete /> Delete
-              </button>
-            </div>
-          )}
-        </div>
+      <div className="flex bg-transparent justify-end items-center gap-2 w-full h-auto">
+        {/* <span className="bg-red-200 text-xs text-red-600 px-2 py-1 rounded-md border border-red-500">N</span>
+        <span className="bg-green-200 text-xs text-green-600 px-2 py-1 rounded-md border border-green-500">P</span> */}
+        
       </div>
 
       {/* CHAT AREA */}
-      <div ref={chatContainerRef} className="flex-1 overflow-y-auto space-y-4 p-4 rounded-lg mt-4 scrollbar-hide">
+      <div ref={chatContainerRef} className="flex-1  w-[100%] sm:w-[96%] overflow-y-auto space-y-4 p-1 sm:p-4 rounded-lg mt-1 scrollbar-hide">
         {messages.map((msg, idx) => (
           <div 
           key={idx} 
           id={`message-${msg.id}`}
           className={`flex ${msg.type === "user" ? "justify-end" : "justify-start"}`}>
-            <div className={`max-w-[75%] rounded-2xl px-4 py-3 shadow-sm ${
+            <div className={`max-w-[95%] sm:max-w-[75%] rounded-2xl px-4 py-3 shadow-sm ${
               msg.type === "user"
-                ? "bg-[#E013CC] text-white rounded-br-md"
-                : "bg-white text-gray-800 border border-[#83828246] rounded-bl-md"
+                ? "bg-[#E013CC] text-white text-sm sm:text-md rounded-br-md"
+                : "bg-white text-gray-800 text-sm sm:text-md border border-[#83828246] rounded-bl-md"
             }`}>
               {msg.type === "user" && (
                 <div>{highlightText(msg.text)}</div>
@@ -291,8 +259,8 @@ export default function AISummaries({
       </div>
 
       {/* INPUT */}
-      <div className="flex justify-center items-center mt-4 w-full p-2">
-        <div className="flex justify-center items-center gap-2 bg-[#F8F8F8] w-3xl border border-[#96949446] rounded-3xl px-3 py-1">
+      <div className="flex justify-center items-center mt-4 w-full p-1 sm:p-2 ">
+        <div className="flex justify-center items-center gap-2 bg-[#F8F8F8] w-full sm:w-3xl border border-[#96949446] rounded-3xl px-3 py-1">
           <button onClick={() => setMore((p) => !p)} className="flex justify-center items-center w-10 h-10 rounded-full hover:bg-[#6969692a]">
             <IoAddSharp />
           </button>
@@ -301,13 +269,13 @@ export default function AISummaries({
             <textarea
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Ask PulseAI anything…"
-              className="w-full h-10 bg-transparent focus:outline-none mt-4"
+              placeholder="Message PulseAI"
+              className="w-full h-10 bg-transparent text-sm sm:text-md focus:outline-none mt-4"
             />
 
-            <button type="submit" disabled={isLoading || !input.trim()} className="flex justify-center items-center text-gray-600 w-10 h-10 rounded-full hover:bg-[#6969692a] transition cursor-pointer duration-300">
+            {/* <button type="submit" disabled={isLoading || !input.trim()} className="flex justify-center items-center text-gray-600 w-10 h-10 rounded-full hover:bg-[#6969692a] transition cursor-pointer duration-300">
               <IoMicOutline />
-            </button>
+            </button> */}
 
             <button type="submit" disabled={isLoading || !input.trim()} className="flex justify-center items-center w-10 h-10 rounded-full bg-[#E013CC] text-white hover:bg-black transition cursor-pointer duration-300">
               <IoMdSend />

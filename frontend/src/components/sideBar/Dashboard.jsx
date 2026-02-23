@@ -135,26 +135,48 @@ export default function Dashboard() {
   // Chart options
   const lineOptions = {
     responsive: true,
+    maintainAspectRatio: false,
     plugins: {
       legend: { display: false },
       tooltip: { backgroundColor: "#E013CC" }
     },
     scales: {
-      y: { beginAtZero: true, max: 100 }
+      y: { 
+        beginAtZero: true, 
+        max: 100,
+        grid: { color: "#f0f0f0" }
+      },
+      x: {
+        grid: { display: false }
+      }
     }
   };
 
   const pieOptions = {
     responsive: true,
+    maintainAspectRatio: false,
     plugins: {
-      legend: { position: 'bottom' }
+      legend: { 
+        position: 'bottom',
+        labels: { boxWidth: 12, padding: 15 }
+      }
     }
   };
 
   const barOptions = {
     responsive: true,
+    maintainAspectRatio: false,
     plugins: {
       legend: { display: false }
+    },
+    scales: {
+      y: { 
+        beginAtZero: true,
+        grid: { color: "#f0f0f0" }
+      },
+      x: {
+        grid: { display: false }
+      }
     }
   };
 
@@ -170,64 +192,117 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="flex flex-col h-full w-full gap-2 bg-white px-4">
+    <div className="flex flex-col h-full w-full gap-4 sm:gap-6 bg-white px-2 sm:px-4 pb-4 overflow-y-auto">
          
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 mb-8">
-        <div className="bg-white text-[#E013CC] border border-[#DBD9DB] rounded-lg p-4 shadow hover:scale-105 transform transition">
-          <p className="text-sm">Total Analyses</p>
-          <p className="text-2xl font-bold">{stats.total_analyses}</p>
+      {/* Summary Cards - Responsive Grid */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 my-2 sm:my-4">
+        <div className="bg-white text-[#E013CC] border border-[#DBD9DB] rounded-lg p-3 sm:p-4 shadow hover:scale-105 transform transition duration-300">
+          <p className="text-xs sm:text-sm text-gray-600">Total Analyses</p>
+          <p className="text-xl sm:text-2xl font-bold">{stats.total_analyses}</p>
         </div>
-        <div className="bg-white text-[#E013CC] border border-[#DBD9DB] rounded-lg p-4 shadow hover:scale-105 transform transition">
-          <p className="text-sm">Avg Sentiment</p>
-          <p className="text-2xl font-bold">{stats.avg_sentiment}%</p>
+        
+        <div className="bg-white text-[#E013CC] border border-[#DBD9DB] rounded-lg p-3 sm:p-4 shadow hover:scale-105 transform transition duration-300">
+          <p className="text-xs sm:text-sm text-gray-600">Avg Sentiment</p>
+          <p className="text-xl sm:text-2xl font-bold">{stats.avg_sentiment}%</p>
         </div>
-        <div className="bg-white text-[#E013CC] border border-[#DBD9DB] rounded-lg p-4 shadow hover:scale-105 transform transition">
-          <p className="text-sm">Risk Alerts</p>
-          <p className="text-2xl font-bold">{stats.risk_alerts}</p>
+        
+        <div className="bg-white text-[#E013CC] border border-[#DBD9DB] rounded-lg p-3 sm:p-4 shadow hover:scale-105 transform transition duration-300">
+          <p className="text-xs sm:text-sm text-gray-600">Risk Alerts</p>
+          <p className="text-xl sm:text-2xl font-bold">{stats.risk_alerts}</p>
         </div>
-        <div className="bg-white text-[#E013CC] border border-[#DBD9DB] rounded-lg p-4 shadow hover:scale-105 transform transition">
-          <p className="text-sm">Topics Analyzed</p>
-          <p className="text-2xl font-bold">{stats.topics_analyzed}</p>
+        
+        <div className="bg-white text-[#E013CC] border border-[#DBD9DB] rounded-lg p-3 sm:p-4 shadow hover:scale-105 transform transition duration-300">
+          <p className="text-xs sm:text-sm text-gray-600">Topics Analyzed</p>
+          <p className="text-xl sm:text-2xl font-bold">{stats.topics_analyzed}</p>
         </div>
       </div>
 
-      {/* Charts Section */}
-      <div className="flex flex-wrap gap-4 w-full p-2">
-        {/* Sentiment Over Time */}
-        <div className="flex flex-col justify-center items-center w-full md:w-[32%] bg-white p-2 rounded-lg shadow border border-[#0000001f]">
-          <h2 className="text-lg text-[#3F3E3E] font-bold mb-10">
+      {/* Charts Section - Responsive Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 w-full">
+        
+        {/* Sentiment Over Time Chart */}
+        <div className="flex flex-col bg-white p-3 sm:p-4 rounded-lg shadow border border-[#0000001f] h-[300px] sm:h-[350px]">
+          <h2 className="text-base sm:text-lg text-[#3F3E3E] font-bold mb-2 sm:mb-4">
             Sentiment Over Time
           </h2>
-          {sentimentData.labels.length > 0 ? (
-            <Line data={sentimentData} options={lineOptions} />
-          ) : (
-            <p className="text-gray-400">No sentiment data available</p>
-          )}
+          <div className="flex-1 w-full">
+            {sentimentData.labels.length > 0 ? (
+              <Line data={sentimentData} options={lineOptions} />
+            ) : (
+              <div className="flex items-center justify-center h-full text-gray-400">
+                No sentiment data available
+              </div>
+            )}
+          </div>
         </div>
 
-        {/* Risk Distribution */}
-        <div className="flex flex-col justify-center items-center w-full md:w-[32%] bg-white p-2 rounded-lg shadow border border-[#0000001f]">
-          <h2 className="text-lg text-[#3F3E3E] font-bold mb-2">
+        {/* Risk Distribution Chart */}
+        <div className="flex flex-col bg-white p-3 sm:p-4 rounded-lg shadow border border-[#0000001f] h-[300px] sm:h-[350px]">
+          <h2 className="text-base sm:text-lg text-[#3F3E3E] font-bold mb-2 sm:mb-4">
             Risk Distribution
           </h2>
-          {riskData.datasets[0].data.some(val => val > 0) ? (
-            <Pie data={riskData} options={pieOptions} />
-          ) : (
-            <p className="text-gray-400">No risk data available</p>
-          )}
+          <div className="flex-1 w-full">
+            {riskData.datasets[0].data.some(val => val > 0) ? (
+              <Pie data={riskData} options={pieOptions} />
+            ) : (
+              <div className="flex items-center justify-center h-full text-gray-400">
+                No risk data available
+              </div>
+            )}
+          </div>
         </div>
 
-        {/* Topic Frequency */}
-        <div className="flex flex-col justify-center items-center w-full md:w-[32%] bg-white p-2 rounded-lg shadow border border-[#0000001f]">
-          <h2 className="text-lg text-[#3F3E3E] font-bold mb-2">
+        {/* Topic Frequency Chart */}
+        <div className="flex flex-col bg-white p-3 sm:p-4 rounded-lg shadow border border-[#0000001f] h-[300px] sm:h-[350px]">
+          <h2 className="text-base sm:text-lg text-[#3F3E3E] font-bold mb-2 sm:mb-4">
             Topic Frequency
           </h2>
-          {topicsData.labels.length > 0 ? (
-            <Bar data={topicsData} options={barOptions} />
-          ) : (
-            <p className="text-gray-400">No topic data available</p>
-          )}
+          <div className="flex-1 w-full">
+            {topicsData.labels.length > 0 ? (
+              <Bar data={topicsData} options={barOptions} />
+            ) : (
+              <div className="flex items-center justify-center h-full text-gray-400">
+                No topic data available
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Optional: Additional Stats Row */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mt-2">
+        <div className="bg-gradient-to-br from-purple-50 to-pink-50 p-3 rounded-lg text-center">
+          <p className="text-xs text-gray-600">Positive Sentiment</p>
+          <p className="text-lg font-semibold text-green-600">
+            {sentimentData.datasets[0].data.length > 0 
+              ? Math.round(sentimentData.datasets[0].data.reduce((a, b) => a + b, 0) / sentimentData.datasets[0].data.length) 
+              : 0}%
+          </p>
+        </div>
+        
+        <div className="bg-gradient-to-br from-purple-50 to-pink-50 p-3 rounded-lg text-center">
+          <p className="text-xs text-gray-600">Total Messages</p>
+          <p className="text-lg font-semibold text-[#E013CC]">
+            {stats.total_analyses}
+          </p>
+        </div>
+        
+        <div className="bg-gradient-to-br from-purple-50 to-pink-50 p-3 rounded-lg text-center">
+          <p className="text-xs text-gray-600">Risk Ratio</p>
+          <p className="text-lg font-semibold text-orange-600">
+            {stats.total_analyses > 0 
+              ? Math.round((stats.risk_alerts / stats.total_analyses) * 100) 
+              : 0}%
+          </p>
+        </div>
+        
+        <div className="bg-gradient-to-br from-purple-50 to-pink-50 p-3 rounded-lg text-center">
+          <p className="text-xs text-gray-600">Topics/Msg</p>
+          <p className="text-lg font-semibold text-blue-600">
+            {stats.total_analyses > 0 
+              ? (stats.topics_analyzed / stats.total_analyses).toFixed(1) 
+              : 0}
+          </p>
         </div>
       </div>
     </div>
