@@ -43,7 +43,7 @@ def analyze_feedback(
         ).first()
         
         if chat:
-            # Save user message
+            # Save user message (ALWAYS save this)
             user_message = Message(
                 chat_id=chat.id,
                 user_id=current_user.id,
@@ -53,9 +53,9 @@ def analyze_feedback(
             )
             db.add(user_message)
 
-            # Save AI response if it's an analysis
+            # Save AI response based on type (ALWAYS save this)
             if ai_result["type"] == "analysis_response":
-                # Create a rich content object with all analysis data
+                # Analysis response - save as JSON with all data
                 ai_content = {
                     "text": ai_result.get("feedback", ""),
                     "summary": ai_result.get("summary", ""),
@@ -72,11 +72,21 @@ def analyze_feedback(
                     content=json.dumps(ai_content),  # Store as JSON string
                     risk=1 if ai_result.get("risk") else 0
                 )
-                db.add(ai_message)
+                
+            else:  # human_response (casual conversation)
+                # Casual response - save as plain text
+                ai_message = Message(
+                    chat_id=chat.id,
+                    user_id=current_user.id,
+                    role="ai",
+                    content=ai_result.get("response", ""),  # Just the text response
+                    risk=0  # Casual messages have no risk
+                )
             
+            db.add(ai_message)
             db.commit()
 
-    # Save to sentiment history (keeping your existing logic)
+    # Save to sentiment history ONLY for analysis responses
     if ai_result["type"] == "analysis_response":
         sentiment_result = ai_result["sentiment"]
 
@@ -277,35 +287,34 @@ def get_dashboard_stats(
 ):
     """Get overall statistics for the dashboard"""
     
-    # Total analyses (sentiment history count)
+    # Total analyses (sentiment history count) for CURRENT USER ONLY
     total_analyses = db.query(SentimentHistory).filter(
         SentimentHistory.user_id == current_user.id
     ).count()
     
-    # Average sentiment confidence
+    # Average sentiment confidence for CURRENT USER ONLY
     avg_sentiment = db.query(
         func.avg(SentimentHistory.confidence)
     ).filter(
         SentimentHistory.user_id == current_user.id
     ).scalar() or 0
     
-    # Risk alerts (messages with risk=1)
+    # Risk alerts (messages with risk=1) for CURRENT USER ONLY
     risk_alerts = db.query(Message).filter(
         Message.user_id == current_user.id,
         Message.risk == 1
     ).count()
     
-    # Unique topics (from AI messages where topics exist)
-    # This is a bit complex - we'll approximate by counting messages with topics
+    # Topics analyzed for CURRENT USER ONLY
     topics_count = db.query(Message).filter(
         Message.user_id == current_user.id,
         Message.role == "ai",
-        Message.content.like('%topics%')  # Simple filter for messages that might have topics
+        Message.content.like('%topics%')
     ).count()
     
     return {
         "total_analyses": total_analyses,
-        "avg_sentiment": round(avg_sentiment * 100, 1),  # Convert to percentage
+        "avg_sentiment": round(avg_sentiment * 100, 1),
         "risk_alerts": risk_alerts,
         "topics_analyzed": topics_count
     }
@@ -376,16 +385,54 @@ def get_risk_distribution(
     }
 
 
-@router.get("/dashboard/topics-frequency", summary="Get most frequent topics")
+@router.get("/dashboard/topics-frequency", summary="Get most frequent topics from messages")
 def get_topics_frequency(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    """Get most common topics from AI responses"""
+    """Extract and count real topics from user's AI messages"""
     
-    # This is simplified - you might need to parse JSON content
-    # For now, return sample data structure
+    # Get all AI messages for the current user
+    ai_messages = db.query(Message).filter(
+        Message.user_id == current_user.id,
+        Message.role == "ai"
+    ).all()
+    
+    topic_counter = {}
+    
+    for message in ai_messages:
+        try:
+            # Try to parse the content as JSON
+            content = json.loads(message.content)
+            
+            # Extract topics if they exist
+            if isinstance(content, dict) and 'topics' in content:
+                topics = content['topics']
+                if isinstance(topics, list):
+                    for topic in topics:
+                        # Clean and capitalize topic
+                        topic = topic.strip().lower()
+                        if topic and len(topic) > 2:  # Filter out very short topics
+                            topic_counter[topic] = topic_counter.get(topic, 0) + 1
+        except (json.JSONDecodeError, AttributeError, KeyError):
+            # Skip messages that aren't JSON or don't have topics
+            continue
+    
+    # Sort by frequency and get top 8 topics (for better chart display)
+    sorted_topics = sorted(topic_counter.items(), key=lambda x: x[1], reverse=True)[:8]
+    
+    if not sorted_topics:
+        # Return a friendly message when no topics found
+        return {
+            "labels": ["No topics yet"],
+            "data": [1]
+        }
+    
+    # Format for the chart
+    labels = [topic[0].capitalize() for topic in sorted_topics]
+    data = [topic[1] for topic in sorted_topics]
+    
     return {
-        "labels": ["AI", "Python", "Machine Learning", "Data", "Cloud"],
-        "data": [15, 12, 10, 8, 6]
+        "labels": labels,
+        "data": data
     }
