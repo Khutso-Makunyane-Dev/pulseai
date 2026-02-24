@@ -51,7 +51,7 @@ export default function Login() {
 
       <h1 className="text-[#696969] text-2xl font-bold">Login</h1>
 
-      <p className="text-[#696969] text-md text-center sm:text-lg font-semibold">
+      <p className="text-[#696969] text-md text-center sm:text-lg ">
         Welcome back to PulseAI, smart and analytical AI system
       </p>
 

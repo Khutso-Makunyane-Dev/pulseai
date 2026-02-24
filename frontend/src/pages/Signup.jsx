@@ -51,7 +51,7 @@ export default function Signup() {
                 Sign Up
             </h1>
 
-            <p className="text-[#696969] text-md text-center sm:text-lgfont-semibold">
+            <p className="text-[#696969] text-md text-center sm:text-lg ">
                 PulseAI, smart and analytical AI system
             </p>
 
