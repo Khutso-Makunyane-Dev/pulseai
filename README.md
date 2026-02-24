@@ -81,9 +81,9 @@ Contributions, issues, and feature requests are welcome! Feel free to check the 
 ## 📬 Contact
 
 **Khutso Makunyane**  
-*Junior Software Developer*  
+Junior Software Developer | junior AL/ML Developer | UX UI Designer
 LinkedIn Profil: https://www.linkedin.com/in/khutso-makunyane-5353b1329
 GitHub Profile URL: https://github.com/Khutso-Makunyane-Dev
 khutsomakunyane1@gmail.com
 
-**Project Link:** [https://github.com/your-username/pulseai](https://github.com/your-username/pulseai)
+
