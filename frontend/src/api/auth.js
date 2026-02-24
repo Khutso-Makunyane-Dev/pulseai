@@ -1,12 +1,13 @@
 import axios from "axios";
 
-// 🔥 HARDCODED - THIS IS THE ONLY WAY
-const API_BASE = "https://pulseai-optd.onrender.com";
+// Use environment variable with fallback
+const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:8000";
 
-console.log("%c🔧 BACKEND URL HARDCODED TO:", "color: green; font-weight: bold", API_BASE);
+console.log("%c🔧 BACKEND URL:", "color: green; font-weight: bold", API_BASE);
+console.log("🌍 Environment:", import.meta.env.MODE);
 
 const api = axios.create({
-  baseURL: API_BASE, // Hardcoded - no environment variable
+  baseURL: API_BASE,
   headers: {
     "Content-Type": "application/json",
   },
@@ -19,7 +20,6 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-    // Log every request to verify URL
     console.log(`🌍 API Request: ${config.method.toUpperCase()} ${config.baseURL}${config.url}`);
     return config;
   },
