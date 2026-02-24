@@ -27,7 +27,6 @@ ENVIRONMENT = os.getenv("ENVIRONMENT", "development")
 # CORS configuration
 if ENVIRONMENT == "production":
     origins = [
-        "https://pulseai-optd.onrender.com",           # Your backend
         "https://pulseai-vert.vercel.app",              # Your main frontend
         "https://pulseai-dckdgxs3q-khutsos-projects.vercel.app", # Preview deployment
         "https://*.vercel.app",                          # Allow all Vercel apps (optional)
