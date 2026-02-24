@@ -21,3 +21,13 @@ class UserLogin(BaseModel):
 class Token(BaseModel):
     access_token: str
     token_type: str = "bearer"
+
+# -------------------
+# Schema for user response (no password)
+# -------------------
+class UserResponse(BaseModel):
+    username: str
+    email: EmailStr
+    
+    class Config:
+        orm_mode = True

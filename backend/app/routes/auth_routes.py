@@ -70,13 +70,9 @@ def login(form_data: schemas.UserLogin, db: Session = Depends(get_db)):
 # -------------------
 # Current logged-in user
 # -------------------
-@router.get("/me", response_model=schemas.UserCreate)
+@router.get("/me", response_model=schemas.UserResponse)  # ✅ Changed to UserResponse
 def get_me(current_user: models.User = Depends(auth.get_current_user)):
     """
     Returns the currently authenticated user info.
     """
-    return {
-        "username": current_user.username,
-        "email": current_user.email,
-        "password": ""  # Do not return password
-    }
+    return current_user  # ✅ FastAPI will convert ORM model to schema
