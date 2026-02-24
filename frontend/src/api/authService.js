@@ -31,13 +31,13 @@ export const login = async (credentials) => {
 // -------------------
 export const fetchCurrentUser = async () => {
   const token = localStorage.getItem("accessToken");
+  console.log("🔍 fetchCurrentUser called. Token exists:", !!token);
+  
   if (!token) return null;
 
-  const response = await api.get("/auth/me", {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+  console.log("📡 Calling /auth/me");
+  const response = await api.get("/auth/me");
+  console.log("📡 Response:", response.status);
   return response.data;
 };
 
