@@ -1,6 +1,7 @@
 import axios from "axios";
 
-const API_BASE = "https://pulseai-optd.onrender.com" || "http://localhost:8000";
+const API_BASE = "https://pulseai-optd.onrender.com"; // HARDCODED
+console.log("🔥 USING BACKEND:", API_BASE);
 
 const api = axios.create({
   baseURL: API_BASE,
