@@ -1,31 +1,28 @@
 # app/ai/summary.py
 from transformers import pipeline
+from functools import lru_cache
 
-# Use a tiny, efficient summarization model
-# "t5-small" is much smaller than BART
-summarizer = pipeline(
-    "summarization",
-    model="t5-small",
-    tokenizer="t5-small"
-)
+@lru_cache(maxsize=1)
+def get_summarizer():
+    """Load and cache the summarization pipeline lazily."""
+    print("Loading T5 summarization model...")  # Helpful log for debugging
+    return pipeline(
+        "summarization",
+        model="t5-small",
+        tokenizer="t5-small"
+    )
 
 def summarize_text(text: str, max_length: int = 50):
     """
     Generate a summary using a lightweight model.
-    
-    Args:
-        text (str): Input text
-        max_length (int): Max length of summary in words
-    
-    Returns:
-        str: Summary
+    Model is loaded on the first request.
     """
     # For very short texts, just return the text
     if len(text.split()) < 10:
         return text
-    
+
     try:
-        # T5 works better with a prefix
+        summarizer = get_summarizer()  # Loads only when first called
         summary = summarizer(
             "summarize: " + text,
             max_length=max_length,
