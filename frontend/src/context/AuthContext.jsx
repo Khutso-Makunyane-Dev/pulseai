@@ -1,5 +1,5 @@
 import { createContext, useState, useEffect } from "react";
-import axios from "axios";
+import api from "./api/auth"; // ✅ Import your configured axios instance
 
 export const AuthContext = createContext(null);
 
@@ -22,7 +22,8 @@ export const AuthProvider = ({ children }) => {
   // Fetch logged-in user info
   const fetchCurrentUser = async (accessToken) => {
     try {
-      const res = await axios.get("/auth/me", {
+      // ✅ Use 'api' instead of 'axios'
+      const res = await api.get("/auth/me", {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },

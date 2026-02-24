@@ -29,16 +29,17 @@ export const login = async (credentials) => {
 // -------------------
 // Fetch current user
 // -------------------
-export const fetchCurrentUser = async () => {
-  const token = localStorage.getItem("accessToken");
-  console.log("🔍 fetchCurrentUser called. Token exists:", !!token);
-  
-  if (!token) return null;
-
-  console.log("📡 Calling /auth/me");
-  const response = await api.get("/auth/me");
-  console.log("📡 Response:", response.status);
-  return response.data;
+const fetchCurrentUser = async (accessToken) => {
+  try {
+    // ✅ No need to manually add header - interceptor handles it
+    const res = await api.get("/auth/me");
+    setUser(res.data);
+  } catch (err) {
+    console.error("Invalid or expired token, logging out.", err);
+    logout();
+  } finally {
+    setLoading(false);
+  }
 };
 
 // -------------------
