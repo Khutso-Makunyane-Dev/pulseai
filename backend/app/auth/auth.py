@@ -1,11 +1,13 @@
-from passlib.context import CryptContext
+# app/auth/auth.py
+import bcrypt
 from datetime import datetime, timedelta
 from jose import JWTError, jwt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 from app.database import get_db
-from app.auth import models  # your User model
+from app.auth import models
+import logging
 
 # -------------------
 # Config & Password
@@ -14,13 +16,33 @@ SECRET_KEY = "KHUTSO1684!"  # replace with a secure random string
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# Set up logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
-def hash_password(password: str):
-    return pwd_context.hash(password)
+def truncate_password(password: str) -> str:
+    """Truncate password to 72 bytes (bcrypt limitation)"""
+    password_bytes = password.encode('utf-8')
+    if len(password_bytes) > 72:
+        logger.info(f"Password truncated from {len(password_bytes)} to 72 bytes")
+        password_bytes = password_bytes[:72]
+        return password_bytes.decode('utf-8', errors='ignore')
+    return password
 
-def verify_password(plain_password: str, hashed_password: str):
-    return pwd_context.verify(plain_password, hashed_password)
+def hash_password(password: str) -> str:
+    """Hash password using bcrypt directly (no passlib dependency)"""
+    truncated = truncate_password(password)
+    salt = bcrypt.gensalt()
+    hashed = bcrypt.hashpw(truncated.encode('utf-8'), salt)
+    return hashed.decode('utf-8')
+
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    """Verify password using bcrypt directly"""
+    truncated = truncate_password(plain_password)
+    return bcrypt.checkpw(
+        truncated.encode('utf-8'),
+        hashed_password.encode('utf-8')
+    )
 
 # -------------------
 # JWT Token

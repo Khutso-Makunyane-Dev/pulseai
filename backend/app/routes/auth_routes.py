@@ -12,6 +12,8 @@ router = APIRouter(
 # -------------------
 # Sign up route
 # -------------------
+# app/routes/auth_routes.py - update the signup function
+
 @router.post("/signup", response_model=schemas.Token)
 def signup(user: schemas.UserCreate, db: Session = Depends(get_db)):
     # Check if user exists
@@ -23,7 +25,15 @@ def signup(user: schemas.UserCreate, db: Session = Depends(get_db)):
             detail="Username or email already registered"
         )
     
-    # Hash password
+    # Validate password length (bcrypt limitation)
+    password_bytes = user.password.encode('utf-8')
+    if len(password_bytes) > 72:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Password too long. Maximum length is 72 bytes (about 72 characters). Please use a shorter password."
+        )
+    
+    # Hash password using updated auth.py
     hashed_pw = auth.hash_password(user.password)
     
     # Create new user
@@ -38,7 +48,6 @@ def signup(user: schemas.UserCreate, db: Session = Depends(get_db)):
         "access_token": token,
         "token_type": "bearer"
     }
-
 # -------------------
 # Login route
 # -------------------
